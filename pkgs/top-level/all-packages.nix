@@ -40189,6 +40189,8 @@ with pkgs;
 
   duden = callPackage ../applications/misc/duden { };
 
+  zap-soundboard = callPackage ../applications/misc/zap-soundboard { };
+
   zf = callPackage ../tools/misc/zf { };
 
   isolate = callPackage ../tools/security/isolate { };
