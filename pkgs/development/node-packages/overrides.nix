@@ -1,4 +1,4 @@
-# Do not use overrides in this file to add  `meta.mainProgram` to packges. Use `./main-programs.nix`
+# Do not use overrides in this file to add  `meta.mainProgram` to packages. Use `./main-programs.nix`
 # instead.
 { pkgs, nodejs }:
 
@@ -17,6 +17,8 @@ let
 in
 
 final: prev: {
+  inherit nodejs;
+
   "@angular/cli" = prev."@angular/cli".override {
     prePatch = ''
       export NG_CLI_ANALYTICS=false
@@ -135,23 +137,18 @@ final: prev: {
     meta = oldAttrs.meta // { broken = since "12"; };
   });
 
+  castnow = prev.castnow.override {
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    postInstall = ''
+      wrapProgram "$out/bin/castnow" \
+          --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.ffmpeg ]}
+    '';
+  };
+
   eask = prev."@emacs-eask/cli".override {
     name = "eask";
   };
-
-  # NOTE: this is a stub package to fetch npm dependencies for
-  # ../../applications/video/epgstation
-  epgstation = prev."epgstation-../../applications/video/epgstation".override (oldAttrs: {
-    buildInputs = [ pkgs.postgresql ];
-    nativeBuildInputs = [ final.node-pre-gyp final.node-gyp-build pkgs.which ];
-    meta = oldAttrs.meta // { platforms = lib.platforms.none; };
-  });
-
-  # NOTE: this is a stub package to fetch npm dependencies for
-  # ../../applications/video/epgstation/client
-  epgstation-client = prev."epgstation-client-../../applications/video/epgstation/client".override (oldAttrs: {
-    meta = oldAttrs.meta // { platforms = lib.platforms.none; };
-  });
 
   expo-cli = prev."expo-cli".override (oldAttrs: {
     # The traveling-fastlane-darwin optional dependency aborts build on Linux.
@@ -229,7 +226,11 @@ final: prev: {
   });
 
   joplin = prev.joplin.override {
-    nativeBuildInputs = [ pkgs.pkg-config ];
+    nativeBuildInputs = [
+      pkgs.pkg-config
+    ] ++ lib.optionals stdenv.isDarwin [
+      pkgs.xcbuild
+    ];
     buildInputs = with pkgs; [
       # required by sharp
       # https://sharp.pixelplumbing.com/install
@@ -279,20 +280,6 @@ final: prev: {
       ${lib.optionalString stdenv.isLinux "patchelf --set-interpreter ${stdenv.cc.libc}/lib/ld-linux-x86-64.so.2 \"$out/lib/node_modules/makam/makam-bin-linux64\""}
     '';
   };
-
-  manta = prev.manta.override ( oldAttrs: {
-    nativeBuildInputs = with pkgs; [ nodejs_14 installShellFiles ];
-    postInstall = ''
-      # create completions, following upstream procedure https://github.com/joyent/node-manta/blob/v5.2.3/Makefile#L85-L91
-      completion_cmds=$(find ./bin -type f -printf "%f\n")
-
-      node ./lib/create_client.js
-      for cmd in $completion_cmds; do
-        installShellCompletion --cmd $cmd --bash <(./bin/$cmd --completion)
-      done
-    '';
-    meta = oldAttrs.meta // { maintainers = with lib.maintainers; [ teutat3s ]; };
-  });
 
   mermaid-cli = prev."@mermaid-js/mermaid-cli".override (
   if stdenv.isDarwin
@@ -446,26 +433,6 @@ final: prev: {
     '';
   };
 
-  readability-cli = prev.readability-cli.override (oldAttrs: {
-    # Wrap src to fix this build error:
-    # > readability-cli/readable.ts: unsupported interpreter directive "#!/usr/bin/env -S deno..."
-    #
-    # Need to wrap the source, instead of patching in patchPhase, because
-    # buildNodePackage only unpacks sources in the installPhase.
-    src = pkgs.srcOnly {
-      src = oldAttrs.src;
-      name = oldAttrs.name;
-      patchPhase = "chmod a-x readable.ts";
-    };
-
-    nativeBuildInputs = [ pkgs.pkg-config ];
-    buildInputs = with pkgs; [
-      pixman
-      cairo
-      pango
-    ];
-  });
-
   reveal-md = prev.reveal-md.override (
     lib.optionalAttrs (!stdenv.isDarwin) {
       nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
@@ -526,16 +493,6 @@ final: prev: {
     '';
   };
 
-  thelounge = prev.thelounge.override (oldAttrs: {
-    buildInputs = [ final.node-pre-gyp ];
-    postInstall = ''
-      echo /var/lib/thelounge > $out/lib/node_modules/thelounge/.thelounge_home
-      patch -d $out/lib/node_modules/thelounge -p1 < ${./thelounge-packages-path.patch}
-    '';
-    passthru.tests = { inherit (nixosTests) thelounge; };
-    meta = oldAttrs.meta // { maintainers = with lib.maintainers; [ winter ]; };
-  });
-
   thelounge-plugin-closepms = prev.thelounge-plugin-closepms.override {
     nativeBuildInputs = [ final.node-pre-gyp ];
   };
@@ -560,19 +517,11 @@ final: prev: {
     '';
   };
 
-  triton = prev.triton.override (oldAttrs: {
-    nativeBuildInputs = [ pkgs.installShellFiles ];
-    postInstall = ''
-      installShellCompletion --cmd triton --bash <($out/bin/triton completion)
-    '';
-    meta = oldAttrs.meta // { maintainers = with lib.maintainers; [ teutat3s ]; };
-  });
-
   ts-node = prev.ts-node.override {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
     postInstall = ''
       wrapProgram "$out/bin/ts-node" \
-      --prefix NODE_PATH : ${final.typescript}/lib/node_modules
+      --prefix NODE_PATH : ${pkgs.typescript}/lib/node_modules
     '';
   };
 
@@ -580,14 +529,14 @@ final: prev: {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
     postInstall = ''
       wrapProgram "$out/bin/tsun" \
-      --prefix NODE_PATH : ${final.typescript}/lib/node_modules
+      --prefix NODE_PATH : ${pkgs.typescript}/lib/node_modules
     '';
   };
 
   typescript-language-server = prev.typescript-language-server.override {
     nativeBuildInputs = [ pkgs.buildPackages.makeWrapper ];
     postInstall = ''
-      ${pkgs.xorg.lndir}/bin/lndir ${final.typescript} $out
+      ${pkgs.xorg.lndir}/bin/lndir ${pkgs.typescript} $out
     '';
   };
 
@@ -624,6 +573,10 @@ final: prev: {
       };
   };
 
+  volar = final."@volar/vue-language-server".override {
+    name = "volar";
+  };
+
   wavedrom-cli = prev.wavedrom-cli.override {
     nativeBuildInputs = [ pkgs.pkg-config final.node-pre-gyp ];
     # These dependencies are required by
@@ -644,6 +597,11 @@ final: prev: {
 
   wrangler = prev.wrangler.override (oldAttrs: {
     meta = oldAttrs.meta // { broken = before "16.13"; };
+    buildInputs = [ pkgs.llvmPackages.libcxx pkgs.llvmPackages.libunwind ] ++ lib.optional stdenv.isLinux pkgs.autoPatchelfHook;
+    preFixup = ''
+      # patch elf is trying to patch binary for sunos
+      rm -r $out/lib/node_modules/wrangler/node_modules/@esbuild/sunos-x64
+    '';
   });
 
   yaml-language-server = prev.yaml-language-server.override {

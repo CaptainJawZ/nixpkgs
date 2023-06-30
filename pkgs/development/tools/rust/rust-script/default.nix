@@ -2,16 +2,16 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "rust-script";
-  version = "0.26.0";
+  version = "0.29.0";
 
   src = fetchFromGitHub {
     owner = "fornwall";
     repo = pname;
     rev = version;
-    sha256 = "sha256-2ZEFtpaKBhF8puYB5gqttrdxKI2zrm6wjukRM+mBeF0=";
+    sha256 = "sha256-c55MiXpMnOsMUI5Bg6k8Ta9iT3G+ixzfMbj9T17OKAY=";
   };
 
-  cargoSha256 = "sha256-HRT0PSI0x2I/zuKKDcn08cyBC8gxkC5XXRFle/Ayrkg=";
+  cargoSha256 = "sha256-yuwerF4gICPSpwopB4iMheXC7SMtX7IgSEgRwJ/gJdg=";
 
   # tests require network access
   doCheck = false;

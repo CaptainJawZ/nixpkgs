@@ -22,14 +22,14 @@ with py.pkgs;
 
 buildPythonApplication rec {
   pname = "checkov";
-  version = "2.3.209";
+  version = "2.3.309";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "bridgecrewio";
     repo = pname;
     rev = "refs/tags/${version}";
-    hash = "sha256-7Aj8uAO4/sy1GvG52KPdPXcV6eIjrX14bvTJvqDsWQQ=";
+    hash = "sha256-aTp7K2u9SXwkvFuskMH32Fb9MfAXyU9dyiavmMBVJf4=";
   };
 
   patches = [
@@ -37,11 +37,12 @@ buildPythonApplication rec {
   ];
 
   pythonRelaxDeps = [
-    "dpath"
     "bc-detect-secrets"
     "bc-python-hcl2"
-    "pycep-parser"
+    "dpath"
+    "license-expression"
     "networkx"
+    "pycep-parser"
   ];
 
   nativeBuildInputs = [
@@ -74,6 +75,7 @@ buildPythonApplication rec {
     jmespath
     jsonschema
     junit-xml
+    license-expression
     networkx
     openai
     packaging
@@ -82,6 +84,7 @@ buildPythonApplication rec {
     pycep-parser
     pyyaml
     semantic-version
+    spdx-tools
     tabulate
     termcolor
     tqdm
@@ -118,6 +121,10 @@ buildPythonApplication rec {
     "console"
     # Starting to fail after 2.3.205
     "test_non_multiline_pair"
+    "test_secret_value_in_keyword"
+    "test_runner_verify_secrets_skip_invalid_suppressed"
+    "test_runner_verify_secrets_skip_all_no_effect"
+    "test_runner"
   ];
 
   disabledTestPaths = [

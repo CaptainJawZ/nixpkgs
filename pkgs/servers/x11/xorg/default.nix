@@ -892,11 +892,11 @@ self: with self; {
   # THIS IS A GENERATED FILE.  DO NOT EDIT!
   libX11 = callPackage ({ stdenv, pkg-config, fetchurl, xorgproto, libpthreadstubs, libxcb, xtrans }: stdenv.mkDerivation {
     pname = "libX11";
-    version = "1.8.4";
+    version = "1.8.6";
     builder = ./builder.sh;
     src = fetchurl {
-      url = "mirror://xorg/individual/lib/libX11-1.8.4.tar.xz";
-      sha256 = "067mgmsqck78b7pf5h25irz3zvcnzqbgbz7s7k70967smsjqg8n9";
+      url = "mirror://xorg/individual/lib/libX11-1.8.6.tar.xz";
+      sha256 = "1jawl8zp1h7hdmxx1sc6kmxkki187d9yixr2l03ai6wqqry5nlsr";
     };
     hardeningDisable = [ "bindnow" "relro" ];
     strictDeps = true;
@@ -1453,11 +1453,11 @@ self: with self; {
   # THIS IS A GENERATED FILE.  DO NOT EDIT!
   libxcvt = callPackage ({ stdenv, pkg-config, fetchurl, meson, ninja }: stdenv.mkDerivation {
     pname = "libxcvt";
-    version = "0.1.1";
+    version = "0.1.2";
     builder = ./builder.sh;
     src = fetchurl {
-      url = "mirror://xorg/individual/lib/libxcvt-0.1.1.tar.xz";
-      sha256 = "0acc7vrj5kfb19zvyl7f29rnsvx383dvwc19k70r8prm1lccxsr7";
+      url = "mirror://xorg/individual/lib/libxcvt-0.1.2.tar.xz";
+      sha256 = "0f6vf47lay9y288n8yg9ckjgz5ypn2hnp03ipp7javkr8h2njq85";
     };
     hardeningDisable = [ "bindnow" "relro" ];
     strictDeps = true;

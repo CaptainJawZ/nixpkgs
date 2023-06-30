@@ -3,6 +3,7 @@
 , fetchFromGitHub
 , alsa-lib
 , appstream-glib
+, cargo
 , cmake
 , desktop-file-utils
 , glib
@@ -16,6 +17,7 @@
 , poppler
 , python3
 , rustPlatform
+, rustc
 , shared-mime-info
 , wrapGAppsHook4
 , AudioUnit
@@ -23,19 +25,19 @@
 
 stdenv.mkDerivation rec {
   pname = "rnote";
-  version = "0.6.0";
+  version = "0.7.0";
 
   src = fetchFromGitHub {
     owner = "flxzt";
     repo = "rnote";
     rev = "v${version}";
-    hash = "sha256-47mWlUXp62fMh5c13enFjmuMxzrmEZlwJFsZhYCB1Vs=";
+    hash = "sha256-PkC2w14xM+5ai/RuF0rCUpUCxX3hFNB+fq2RkebPKGQ=";
   };
 
   cargoDeps = rustPlatform.importCargoLock {
     lockFile = ./Cargo.lock;
     outputHashes = {
-      "ink-stroke-modeler-rs-0.1.0" = "sha256-DrbFolHGL3ywk2p6Ly3x0vbjqxy1mXld+5CPrNlJfQM=";
+      "ink-stroke-modeler-rs-0.1.0" = "sha256-1abfrPehOGc/ye/iFIwYPd6HJX6P8OP2vGBSJfeo+c8=";
       "librsvg-2.56.0" = "sha256-4poP7xsoylmnKaUWuJ0tnlgEMpw9iJrM3dvt4IaFi7w=";
       "piet-0.6.2" = "sha256-If0qiZkgXeLvsrECItV9/HmhTk1H52xmVO7cUsD9dcU=";
     };
@@ -51,8 +53,8 @@ stdenv.mkDerivation rec {
     python3 # For the postinstall script
     rustPlatform.bindgenHook
     rustPlatform.cargoSetupHook
-    rustPlatform.rust.cargo
-    rustPlatform.rust.rustc
+    cargo
+    rustc
     shared-mime-info # For update-mime-database
     wrapGAppsHook4
   ];

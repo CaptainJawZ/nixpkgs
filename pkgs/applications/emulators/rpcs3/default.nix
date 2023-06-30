@@ -1,10 +1,9 @@
-{ gcc12Stdenv, lib, fetchFromGitHub, wrapQtAppsHook, cmake, pkg-config, git
+{ lib, stdenv, fetchFromGitHub, wrapQtAppsHook, cmake, pkg-config, git
 , qtbase, qtquickcontrols, qtmultimedia, openal, glew, vulkan-headers, vulkan-loader, libpng
 , ffmpeg, libevdev, libusb1, zlib, curl, wolfssl, python3, pugixml, faudio, flatbuffers
 , sdl2Support ? true, SDL2
-, pulseaudioSupport ? true, libpulseaudio
+, cubebSupport ? true, cubeb
 , waylandSupport ? true, wayland
-, alsaSupport ? true, alsa-lib
 }:
 
 let
@@ -21,7 +20,7 @@ let
     sha256 = "0c3g30rj1y8fbd2q4kwlpg1jdy02z4w5ryhj3yr9051pdnf4kndz";
   };
 in
-gcc12Stdenv.mkDerivation {
+stdenv.mkDerivation {
   pname = "rpcs3";
   version = rpcs3Version;
 
@@ -66,8 +65,7 @@ gcc12Stdenv.mkDerivation {
     qtbase qtquickcontrols qtmultimedia openal glew vulkan-headers vulkan-loader libpng ffmpeg
     libevdev zlib libusb1 curl wolfssl python3 pugixml faudio flatbuffers
   ] ++ lib.optional sdl2Support SDL2
-    ++ lib.optional pulseaudioSupport libpulseaudio
-    ++ lib.optional alsaSupport alsa-lib
+    ++ lib.optionals cubebSupport cubeb.passthru.backendLibs
     ++ lib.optional waylandSupport wayland;
 
   postInstall = ''

@@ -8,13 +8,13 @@
 buildGoModule rec {
   pname = "bosh-cli";
 
-  version = "7.2.2";
+  version = "7.2.4";
 
   src = fetchFromGitHub {
     owner = "cloudfoundry";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-cSix1muhmPrL7fDGznkFAOAoArZoDvptli7uRo71Dlk=";
+    sha256 = "sha256-LVDWgyIBVp7UVnEuQ42eVfxDZB3BZn5InnPX7WN6MrA=";
   };
   vendorHash = null;
 

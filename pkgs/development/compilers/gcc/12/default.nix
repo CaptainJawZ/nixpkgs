@@ -55,8 +55,8 @@ with lib;
 with builtins;
 
 let majorVersion = "12";
-    version = "${majorVersion}.2.0";
-    disableBootstrap = !stdenv.hostPlatform.isDarwin;
+    version = "${majorVersion}.3.0";
+    disableBootstrap = !stdenv.hostPlatform.isDarwin && !profiledCompiler;
 
     inherit (stdenv) buildPlatform hostPlatform targetPlatform;
 
@@ -68,15 +68,19 @@ let majorVersion = "12";
         ../gnat-cflags-11.patch
         ../gcc-12-gfortran-driving.patch
         ../ppc-musl.patch
+
+        # backport ICE fix on ccache code
+        ./lambda-ICE-PR109241.patch
       ]
       # We only apply this patch when building a native toolchain for aarch64-darwin, as it breaks building
       # a foreign one: https://github.com/iains/gcc-12-branch/issues/18
-      ++ optional (stdenv.isDarwin && stdenv.isAarch64 && buildPlatform == hostPlatform && hostPlatform == targetPlatform) (fetchpatch {
-        name = "gcc-12-darwin-aarch64-support.patch";
-        url = "https://github.com/Homebrew/formula-patches/raw/1d184289/gcc/gcc-12.2.0-arm.diff";
-        sha256 = "sha256-omclLslGi/2yCV4pNBMaIpPDMW3tcz/RXdupbNbeOHA=";
-      })
-      ++ optional langD ../libphobos.patch
+      ++ optionals (stdenv.isDarwin && stdenv.isAarch64 && buildPlatform == hostPlatform && hostPlatform == targetPlatform) [
+        (fetchurl {
+          name = "gcc-12-darwin-aarch64-support.patch";
+          url = "https://raw.githubusercontent.com/Homebrew/formula-patches/f1188b90d610e2ed170b22512ff7435ba5c891e2/gcc/gcc-12.3.0.diff";
+          sha256 = "sha256-naL5ZNiurqfDBiPSU8PTbTmLqj25B+vjjiqc4fAFgYs=";
+        })
+      ] ++ optional langD ../libphobos.patch
 
       # backport fixes to build gccgo with musl libc
       ++ optionals (langGo && stdenv.hostPlatform.isMusl) [
@@ -205,7 +209,7 @@ lib.pipe (stdenv.mkDerivation ({
 
   src = fetchurl {
     url = "mirror://gcc/releases/gcc-${version}/gcc-${version}.tar.xz";
-    sha256 = "sha256-5UnPnPNZSgDie2WJ1DItcOByDN0hPzm+tBgeBpJiMP8=";
+    sha256 = "sha256-lJpdT5nnhkIak7Uysi/6tVeN5zITaZdbka7Jet/ajDs=";
   };
 
   inherit patches;
@@ -288,10 +292,15 @@ lib.pipe (stdenv.mkDerivation ({
   targetConfig = if targetPlatform != hostPlatform then targetPlatform.config else null;
 
   buildFlags =
+    # we do not yet have Nix-driven profiling
+    assert profiledCompiler -> !disableBootstrap;
     let target =
           lib.optionalString (profiledCompiler) "profiled" +
           lib.optionalString (targetPlatform == hostPlatform && hostPlatform == buildPlatform && !disableBootstrap) "bootstrap";
     in lib.optional (target != "") target;
+
+  # https://gcc.gnu.org/PR109898
+  enableParallelInstalling = false;
 
   inherit (callFile ../common/strip-attributes.nix { })
     stripDebugList
@@ -341,15 +350,10 @@ lib.pipe (stdenv.mkDerivation ({
   };
 }
 
-// optionalAttrs (targetPlatform != hostPlatform && targetPlatform.libc == "msvcrt" && crossStageStatic) {
-  makeFlags = [ "all-gcc" "all-target-libgcc" ];
-  installTargets = "install-gcc install-target-libgcc";
-}
-
 // optionalAttrs (enableMultilib) { dontMoveLib64 = true; }
 ))
 [
-  (callPackage ../common/libgcc.nix   { inherit langC langCC langJit; })
+  (callPackage ../common/libgcc.nix   { inherit version langC langCC langJit targetPlatform hostPlatform crossStageStatic; })
   (callPackage ../common/checksum.nix { inherit langC langCC; })
 ]
 

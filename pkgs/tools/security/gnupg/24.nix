@@ -6,6 +6,7 @@
 , withPcsc ? !enableMinimal, pcsclite
 , guiSupport ? stdenv.isDarwin, pinentry
 , withTpm2Tss ? !stdenv.isDarwin && !enableMinimal, tpm2-tss
+, nixosTests
 }:
 
 assert guiSupport -> enableMinimal == false;
@@ -85,10 +86,11 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
-  passthru.tests.connman = lib.nixosTests.gnupg;
+  passthru.tests = nixosTests.gnupg;
 
   meta = with lib; {
     homepage = "https://gnupg.org";
+    changelog = "https://git.gnupg.org/cgi-bin/gitweb.cgi?p=${pname}.git;a=blob;f=NEWS;hb=refs/tags/${pname}-${version}";
     description = "Modern release of the GNU Privacy Guard, a GPL OpenPGP implementation";
     license = licenses.gpl3Plus;
     longDescription = ''

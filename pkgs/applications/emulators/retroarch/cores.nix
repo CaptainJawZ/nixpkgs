@@ -42,7 +42,7 @@
 }:
 
 let
-  hashesFile = builtins.fromJSON (builtins.readFile ./hashes.json);
+  hashesFile = lib.importJSON ./hashes.json;
 
   getCoreSrc = core:
     fetchFromGitHub (builtins.getAttr core hashesFile);
@@ -422,6 +422,14 @@ in
     makefile = "Makefile";
     meta = {
       description = "FreeIntv libretro port";
+      license = lib.licenses.gpl3Only;
+    };
+  };
+
+  fuse = mkLibretroCore {
+    core = "fuse";
+    meta = {
+      description = "A port of the Fuse Unix Spectrum Emulator to libretro";
       license = lib.licenses.gpl3Only;
     };
   };
@@ -967,6 +975,14 @@ in
     meta = {
       description = "Port of TIC-80 to libretro";
       license = lib.licenses.mit;
+    };
+  };
+
+  twenty-fortyeight = mkLibretroCore {
+    core = "2048";
+    meta = {
+      description = "Port of 2048 puzzle game to the libretro API";
+      license = lib.licenses.unlicense;
     };
   };
 
