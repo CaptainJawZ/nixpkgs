@@ -25,9 +25,11 @@ let
 
       sectionDHCPv4 = checkUnitConfig "DHCPv4" [
         (assertOnlyFields [
+          "ClientIdentifier"
           "DUIDType"
           "DUIDRawData"
         ])
+        (assertValueOneOf "ClientIdentifier" ["mac" "duid" "duid-only"])
       ];
 
       sectionDHCPv6 = checkUnitConfig "DHCPv6" [
@@ -70,6 +72,9 @@ let
           "CombinedChannels"
           "RxBufferSize"
           "TxBufferSize"
+          "ReceiveQueues"
+          "TransmitQueues"
+          "TransmitQueueLength"
         ])
         (assertValueOneOf "MACAddressPolicy" ["persistent" "random" "none"])
         (assertMacAddress "MACAddress")
@@ -96,6 +101,9 @@ let
         (assertRange "CombinedChannels" 1 4294967295)
         (assertInt "RxBufferSize")
         (assertInt "TxBufferSize")
+        (assertRange "ReceiveQueues" 1 4096)
+        (assertRange "TransmitQueues" 1 4096)
+        (assertRange "TransmitQueueLength" 1 4294967294)
       ];
     };
 
@@ -2383,7 +2391,7 @@ let
     bridgeVLANConfig = mkOption {
       default = {};
       example = { VLAN = "10-20"; };
-      type = types.addCheck (types.attrsOf unitOption) check.network.sectionbridgeVLAN;
+      type = types.addCheck (types.attrsOf unitOption) check.network.sectionBridgeVLAN;
       description = lib.mdDoc ''
         Each attribute in this set specifies an option in the
         `[BridgeVLAN]` section of the unit.  See
@@ -2842,7 +2850,7 @@ let
         ''
         + optionalString (def.tokenBucketFilterConfig != { }) ''
           [TokenBucketFilter]
-          ${attrsToSection def.tockenBucketFilterConfig}
+          ${attrsToSection def.tokenBucketFilterConfig}
         ''
         + optionalString (def.pieConfig != { }) ''
           [PIE]
@@ -3157,7 +3165,7 @@ let
 
     (mkIf cfg.enable {
 
-      systemd.package = pkgs.systemdStage1Network;
+      systemd.package = mkDefault pkgs.systemdStage1Network;
 
       # For networkctl
       systemd.dbus.enable = mkDefault true;
@@ -3180,7 +3188,19 @@ let
 
       systemd.contents."/etc/systemd/networkd.conf" = renderConfig cfg.config;
 
-      systemd.services.systemd-networkd.wantedBy = [ "initrd.target" ];
+      systemd.services.systemd-networkd = {
+        wantedBy = [ "initrd.target" ];
+        # These before and conflicts lines can be removed when this PR makes it into a release:
+        # https://github.com/systemd/systemd/pull/27791
+        before = ["initrd-switch-root.target"];
+        conflicts = ["initrd-switch-root.target"];
+      };
+      systemd.sockets.systemd-networkd = {
+        wantedBy = [ "initrd.target" ];
+        before = ["initrd-switch-root.target"];
+        conflicts = ["initrd-switch-root.target"];
+      };
+
       systemd.services.systemd-network-generator.wantedBy = [ "sysinit.target" ];
 
       systemd.storePaths = [

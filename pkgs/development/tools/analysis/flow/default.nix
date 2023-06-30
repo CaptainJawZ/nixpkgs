@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   pname = "flow";
-  version = "0.205.0";
+  version = "0.209.1";
 
   src = fetchFromGitHub {
     owner = "facebook";
     repo = "flow";
     rev = "v${version}";
-    sha256 = "sha256-+F0NmE9BN8eSmyLnXkgdYy3qdyBvKfRM+hVgYmLvzOg=";
+    sha256 = "sha256-s40gEZjtbqFfQGOVhLYG1Wd/CCyfFB1qoQpk2Huz5P0=";
   };
 
   postPatch = ''
@@ -32,7 +32,7 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     description = "A static type checker for JavaScript";
     homepage = "https://flow.org/";
-    changelog = "https://github.com/facebook/flow/raw/v${version}/Changelog.md";
+    changelog = "https://github.com/facebook/flow/blob/v${version}/Changelog.md";
     license = licenses.mit;
     platforms = ocamlPackages.ocaml.meta.platforms;
     maintainers = with maintainers; [ marsam puffnfresh ];

@@ -10,16 +10,16 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "topgrade";
-  version = "10.3.3";
+  version = "12.0.0";
 
   src = fetchFromGitHub {
     owner = "topgrade-rs";
     repo = "topgrade";
     rev = "v${version}";
-    hash = "sha256-LhTUzY2WrauWHYZU5jA6fn3DDheUgfxCPvjVTwUvF4w=";
+    hash = "sha256-l8/X2PGdUZa9r0E95wpbvag6XW5jV+7H8TJMm/D4yqk=";
   };
 
-  cargoHash = "sha256-ONLZrZjhNcli7ul6fDgVEKm2MS3YYIfPnHS+dmpJHu0=";
+  cargoHash = "sha256-W+NrhHxPDo+WfNMxDmmPlCdTB/YavLDQ2+JEMDF9qJ4=";
 
   nativeBuildInputs = [
     installShellFiles

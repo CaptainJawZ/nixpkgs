@@ -3,7 +3,6 @@
 , fetchzip
 , makeWrapper
 , jre
-, writeText
 , nixosTests
 , callPackage
 
@@ -13,11 +12,11 @@
 
 stdenv.mkDerivation rec {
   pname = "keycloak";
-  version = "20.0.5";
+  version = "21.1.2";
 
   src = fetchzip {
     url = "https://github.com/keycloak/keycloak/releases/download/${version}/keycloak-${version}.zip";
-    hash = "sha256-4h3q9J1+KufMaSuzbX9qaBwXPR8zhVpxQAXDBY3uPjM=";
+    hash = "sha256-yux9LyGkdwQekNWKAx3Oara0D5Qca8g7fgPGeTiF2n4=";
   };
 
   nativeBuildInputs = [ makeWrapper jre ];

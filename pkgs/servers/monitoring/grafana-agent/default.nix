@@ -1,17 +1,25 @@
-{ lib, stdenv, buildGoModule, fetchFromGitHub, systemd, nixosTests }:
+{ lib
+, buildGoModule
+, fetchFromGitHub
+, grafana-agent
+, nixosTests
+, stdenv
+, systemd
+, testers
+}:
 
 buildGoModule rec {
   pname = "grafana-agent";
-  version = "0.33.0";
+  version = "0.34.3";
 
   src = fetchFromGitHub {
-    rev = "v${version}";
     owner = "grafana";
     repo = "agent";
-    sha256 = "sha256-Goj/IySGDMa8pNwU/4oXIlGqMysghNj0EjnQZtN6v1E=";
+    rev = "v${version}";
+    hash = "sha256-llHMTuNWGipL732L+uCupILvomhwZMFT8tJaFkBs+AQ=";
   };
 
-  vendorHash = "sha256-NqsUeTxTYQrVMJ4LYA5NC8A/PpVuy6fnKptxK+ieZAU=";
+  vendorHash = "sha256-x9c6xRk1Ska+kqoFhAJ9ei35Lg8wsgDpZpfxJ3UExfg=";
   proxyVendor = true; # darwin/linux hash mismatch
 
   ldflags = let
@@ -50,12 +58,20 @@ buildGoModule rec {
       $out/bin/grafana-agent
   '';
 
-  passthru.tests.grafana-agent = nixosTests.grafana-agent;
+  passthru.tests = {
+    inherit (nixosTests) grafana-agent;
+    version = testers.testVersion {
+      inherit version;
+      command = "${lib.getExe grafana-agent} --version";
+      package = grafana-agent;
+    };
+  };
 
-  meta = with lib; {
+  meta = {
     description = "A lightweight subset of Prometheus and more, optimized for Grafana Cloud";
-    license = licenses.asl20;
+    license = lib.licenses.asl20;
     homepage = "https://grafana.com/products/cloud";
-    maintainers = with maintainers; [ flokli indeednotjames ];
+    changelog = "https://github.com/grafana/agent/blob/${src.rev}/CHANGELOG.md";
+    maintainers = with lib.maintainers; [ flokli emilylange ];
   };
 }

@@ -37,6 +37,7 @@ let
     dde-session-ui = callPackage ./core/dde-session-ui { };
     dde-polkit-agent = callPackage ./core/dde-polkit-agent { };
     dpa-ext-gnomekeyring = callPackage ./core/dpa-ext-gnomekeyring { };
+    dde-gsettings-schemas = callPackage ./core/dde-gsettings-schemas { };
 
     #### Dtk Application
     deepin-album = callPackage ./apps/deepin-album { };
@@ -56,6 +57,7 @@ let
     deepin-terminal = callPackage ./apps/deepin-terminal { };
     deepin-reader = callPackage ./apps/deepin-reader { };
     deepin-voice-note = callPackage ./apps/deepin-voice-note { };
+    deepin-screensaver = callPackage ./apps/deepin-screensaver { };
 
     #### Go Packages
     go-lib = callPackage ./go-package/go-lib { };
